@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SecureBanking.Application/SecureBanking.Application.csproj" />
+    <Project Path="src/SecureBanking.Domain/SecureBanking.Domain.csproj" />
+    <Project Path="src/SecureBanking.Infrastructure/SecureBanking.Infrastructure.csproj" />
+    <Project Path="src/SecureBanking.WebApi/SecureBanking.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SecureBanking.Application.UnitTests/SecureBanking.Application.UnitTests.csproj" />
+    <Project Path="tests/SecureBanking.Domain.UnitTests/SecureBanking.Domain.UnitTests.csproj" />
+    <Project Path="tests/SecureBanking.IntegrationTests/SecureBanking.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

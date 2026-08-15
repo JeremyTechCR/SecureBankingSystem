@@ -1,0 +1,49 @@
+# Compilación de .NET
+**/bin/
+**/obj/
+artifacts/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# Resultados de pruebas y cobertura
+TestResults/
+**/TestResults/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+*.trx
+
+# Variables de entorno y configuración local sensible
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+appsettings.Secrets.json
+secrets.json
+
+# Certificados y claves criptográficas
+*.pfx
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
+*.jks
+
+# Archivos temporales y del sistema operativo
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
