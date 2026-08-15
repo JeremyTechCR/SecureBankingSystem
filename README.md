@@ -18,7 +18,7 @@ El repositorio servirá como referencia práctica para separar responsabilidades
 - SHA3-256 para una auditoría encadenada
 - AES-256-GCM para proteger datos sensibles en reposo
 
-La fase actual no incluye Entity Framework Core, conexión a SQL Server, autenticación, cifrado ni lógica bancaria.
+La fase actual incorpora exclusivamente el modelo de dominio. No incluye Entity Framework Core, conexión a SQL Server, autenticación, cifrado, transferencias entre cuentas ni una API bancaria funcional.
 
 ## Arquitectura
 
@@ -65,7 +65,7 @@ La API redirige a HTTPS. Al ejecutarla, consulte `GET /health` en la URL HTTPS i
 ## Fases previstas
 
 1. Base arquitectónica, endpoint de salud y pruebas iniciales.
-2. Modelo de dominio para usuarios, clientes y cuentas.
+2. Modelo de dominio para clientes y cuentas. **Completada.**
 3. Persistencia con EF Core 10, SQL Server y migraciones.
 4. Autenticación, autorización y gestión segura de identidades.
 5. Transferencias ACID, historial y control de concurrencia.
@@ -75,4 +75,14 @@ La API redirige a HTTPS. Al ejecutarla, consulte `GET /health` en la URL HTTPS i
 
 ## Estado actual
 
-Fase 1 terminada: solamente está implementada la base arquitectónica, la configuración transversal, el endpoint `GET /health` y su prueba automatizada. Aún no existe lógica bancaria ni persistencia real.
+Fase 2 terminada: además de la base arquitectónica y el endpoint `GET /health`, existe un modelo de dominio sin dependencias externas para clientes y cuentas bancarias.
+
+El dominio incluye las entidades `Customer` y `BankAccount`; los objetos de valor `EmailAddress`, `Currency`, `Money` y `AccountNumber`; estados explícitos; y excepciones específicas para reglas esperadas del negocio. Protege, entre otras, las siguientes invariantes:
+
+- Identificadores obligatorios y fechas de creación expresadas en UTC.
+- Clientes cerrados inmutables y transiciones de estado controladas.
+- Saldos no negativos, operaciones en una única moneda y prevención de sobregiros.
+- Movimientos permitidos solamente en cuentas activas y cierre solamente con saldo cero.
+- Números de cuenta de 12 dígitos que se muestran enmascarados de forma predeterminada.
+
+Todavía no existe persistencia, integración con SQL Server ni una API bancaria funcional.
