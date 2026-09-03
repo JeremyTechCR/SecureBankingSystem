@@ -26,7 +26,20 @@ public sealed class AccountNumberTests
     [Fact]
     public void EqualValues_AreEqual()
     {
-        Assert.Equal(AccountNumber.Create("001234567890"), AccountNumber.Create("001234567890"));
+        AccountNumber first = AccountNumber.Create("001234567890");
+        AccountNumber second = AccountNumber.Create("001234567890");
+
+        Assert.Equal(first, second);
+        Assert.Equal(first.GetHashCode(), second.GetHashCode());
+    }
+
+    [Fact]
+    public void DifferentValuesAndTypes_AreNotEqual()
+    {
+        AccountNumber number = AccountNumber.Create("001234567890");
+
+        Assert.NotEqual(number, AccountNumber.Create("001234567891"));
+        Assert.False(number.Equals("001234567890"));
     }
 
     [Theory]

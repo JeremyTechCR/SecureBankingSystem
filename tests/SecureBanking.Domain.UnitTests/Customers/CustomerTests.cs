@@ -45,6 +45,63 @@ public sealed class CustomerTests
     }
 
     [Fact]
+    public void Create_WithUnspecifiedDate_ThrowsDomainException()
+    {
+        DateTime unspecifiedDate = DateTime.SpecifyKind(CreatedAtUtc, DateTimeKind.Unspecified);
+
+        Assert.Throws<InvalidDomainArgumentException>(
+            () => Customer.Create(Guid.NewGuid(), "Ada", "Lovelace", EmailAddress.Create("ada@example.com"), unspecifiedDate));
+    }
+
+    [Fact]
+    public void Create_WithNullEmail_ThrowsDomainException()
+    {
+        Assert.Throws<InvalidDomainArgumentException>(
+            () => Customer.Create(Guid.NewGuid(), "Ada", "Lovelace", null, CreatedAtUtc));
+    }
+
+    [Theory]
+    [InlineData(null, "Lovelace")]
+    [InlineData("", "Lovelace")]
+    [InlineData("   ", "Lovelace")]
+    [InlineData("Ada", null)]
+    [InlineData("Ada", "")]
+    [InlineData("Ada", "   ")]
+    public void Create_WithMissingName_ThrowsDomainException(string? firstName, string? lastName)
+    {
+        Assert.Throws<InvalidDomainArgumentException>(
+            () => Customer.Create(Guid.NewGuid(), firstName, lastName, EmailAddress.Create("ada@example.com"), CreatedAtUtc));
+    }
+
+    [Fact]
+    public void Create_WithNamesAtMaximumLength_Succeeds()
+    {
+        string maximumLengthName = new('a', 100);
+
+        Customer customer = Customer.Create(
+            Guid.NewGuid(), maximumLengthName, maximumLengthName, EmailAddress.Create("ada@example.com"), CreatedAtUtc);
+
+        Assert.Equal(maximumLengthName, customer.FirstName);
+        Assert.Equal(maximumLengthName, customer.LastName);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Create_WithNameOverMaximumLength_ThrowsDomainException(bool invalidFirstName)
+    {
+        string validName = new('a', 100);
+        string invalidName = new('a', 101);
+
+        Assert.Throws<InvalidDomainArgumentException>(() => Customer.Create(
+            Guid.NewGuid(),
+            invalidFirstName ? invalidName : validName,
+            invalidFirstName ? validName : invalidName,
+            EmailAddress.Create("ada@example.com"),
+            CreatedAtUtc));
+    }
+
+    [Fact]
     public void ChangeNameAndEmail_WithOpenCustomer_UpdatesData()
     {
         Customer customer = CreateCustomer();
@@ -55,6 +112,30 @@ public sealed class CustomerTests
         Assert.Equal("Grace", customer.FirstName);
         Assert.Equal("Hopper", customer.LastName);
         Assert.Equal("grace@example.com", customer.Email.Value);
+    }
+
+    [Fact]
+    public void ChangeName_WithInvalidLastName_PreservesOriginalName()
+    {
+        Customer customer = CreateCustomer();
+
+        Assert.Throws<InvalidDomainArgumentException>(() => customer.ChangeName("Grace", "   "));
+
+        Assert.Equal("Ada", customer.FirstName);
+        Assert.Equal("Lovelace", customer.LastName);
+    }
+
+    [Fact]
+    public void ChangeEmail_WithNullEmail_ThrowsAndPreservesCustomer()
+    {
+        Customer customer = CreateCustomer();
+        EmailAddress originalEmail = customer.Email;
+        CustomerStatus originalStatus = customer.Status;
+
+        Assert.Throws<InvalidDomainArgumentException>(() => customer.ChangeEmail(null!));
+
+        Assert.Equal(originalEmail, customer.Email);
+        Assert.Equal(originalStatus, customer.Status);
     }
 
     [Fact]

@@ -112,6 +112,11 @@ public sealed class BankAccount
             throw new InvalidStateTransitionException("Account is already closed.");
         }
 
+        if (Status != AccountStatus.Active)
+        {
+            throw new InvalidAccountStateException("A frozen account must be unfrozen before it can be closed.");
+        }
+
         if (Balance.Amount != 0m)
         {
             throw new InvalidAccountStateException("Only an account with a zero balance can be closed.");

@@ -84,5 +84,9 @@ El dominio incluye las entidades `Customer` y `BankAccount`; los objetos de valo
 - Saldos no negativos, operaciones en una única moneda y prevención de sobregiros.
 - Movimientos permitidos solamente en cuentas activas y cierre solamente con saldo cero.
 - Números de cuenta de 12 dígitos que se muestran enmascarados de forma predeterminada.
+- Direcciones de correo consideradas case-insensitive en su totalidad y almacenadas en minúsculas.
+- Importes limitados a `999999999999999.9999`, compatibles con el futuro tipo `decimal(19,4)`.
+- Los importes admiten como máximo cuatro decimales; una precisión mayor se rechaza y el dominio nunca redondea dinero implícitamente.
+- Las cuentas congeladas deben descongelarse antes de poder cerrarse.
 
 Todavía no existe persistencia, integración con SQL Server ni una API bancaria funcional.

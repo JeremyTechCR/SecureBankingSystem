@@ -43,6 +43,35 @@ public sealed class BankAccountTests
     }
 
     [Fact]
+    public void Create_WithLocalDate_ThrowsDomainException()
+    {
+        Assert.Throws<InvalidDomainArgumentException>(() => BankAccount.Create(
+            Guid.NewGuid(), Guid.NewGuid(), AccountNumber.Create("001234567890"), AccountType.Checking,
+            Currency.Usd, DateTime.SpecifyKind(CreatedAtUtc, DateTimeKind.Local)));
+    }
+
+    [Fact]
+    public void Create_WithNullAccountNumber_ThrowsDomainException()
+    {
+        Assert.Throws<InvalidDomainArgumentException>(() => BankAccount.Create(
+            Guid.NewGuid(), Guid.NewGuid(), null, AccountType.Checking, Currency.Usd, CreatedAtUtc));
+    }
+
+    [Fact]
+    public void Create_WithNullCurrency_ThrowsDomainException()
+    {
+        Assert.Throws<InvalidDomainArgumentException>(() => BankAccount.Create(
+            Guid.NewGuid(), Guid.NewGuid(), AccountNumber.Create("001234567890"), AccountType.Checking, null, CreatedAtUtc));
+    }
+
+    [Fact]
+    public void Create_WithUndefinedAccountType_ThrowsDomainException()
+    {
+        Assert.Throws<InvalidDomainArgumentException>(() => BankAccount.Create(
+            Guid.NewGuid(), Guid.NewGuid(), AccountNumber.Create("001234567890"), (AccountType)999, Currency.Usd, CreatedAtUtc));
+    }
+
+    [Fact]
     public void Credit_WithPositiveMatchingAmount_IncreasesBalance()
     {
         BankAccount account = CreateAccount();
@@ -85,6 +114,33 @@ public sealed class BankAccountTests
     }
 
     [Fact]
+    public void Credit_WithNullAmount_ThrowsAndPreservesAccount()
+    {
+        BankAccount account = CreateAccount();
+        Money originalBalance = account.Balance;
+        AccountStatus originalStatus = account.Status;
+
+        Assert.Throws<InvalidDomainArgumentException>(() => account.Credit(null!));
+
+        Assert.Equal(originalBalance, account.Balance);
+        Assert.Equal(originalStatus, account.Status);
+    }
+
+    [Fact]
+    public void Debit_WithNullAmount_ThrowsAndPreservesAccount()
+    {
+        BankAccount account = CreateAccount();
+        account.Credit(new Money(10m, Currency.Usd));
+        Money originalBalance = account.Balance;
+        AccountStatus originalStatus = account.Status;
+
+        Assert.Throws<InvalidDomainArgumentException>(() => account.Debit(null!));
+
+        Assert.Equal(originalBalance, account.Balance);
+        Assert.Equal(originalStatus, account.Status);
+    }
+
+    [Fact]
     public void FreezeThenUnfreeze_PerformsValidTransitions()
     {
         BankAccount account = CreateAccount();
@@ -121,6 +177,17 @@ public sealed class BankAccountTests
         Assert.Throws<InvalidStateTransitionException>(() => account.Close());
         Assert.Throws<InvalidStateTransitionException>(() => account.Unfreeze());
         Assert.Throws<InvalidAccountStateException>(() => account.Credit(new Money(1m, Currency.Usd)));
+        Assert.Throws<InvalidAccountStateException>(() => account.Debit(new Money(1m, Currency.Usd)));
+    }
+
+    [Fact]
+    public void Close_WhenFrozenWithZeroBalance_ThrowsAndPreservesFrozenStatus()
+    {
+        BankAccount account = CreateAccount();
+        account.Freeze();
+
+        Assert.Throws<InvalidAccountStateException>(() => account.Close());
+        Assert.Equal(AccountStatus.Frozen, account.Status);
     }
 
     [Fact]

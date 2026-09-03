@@ -50,8 +50,11 @@ public sealed class Customer
     public void ChangeName(string? firstName, string? lastName)
     {
         EnsureCanBeModified();
-        FirstName = NormalizeName(firstName, "First name");
-        LastName = NormalizeName(lastName, "Last name");
+        string normalizedFirstName = NormalizeName(firstName, "First name");
+        string normalizedLastName = NormalizeName(lastName, "Last name");
+
+        FirstName = normalizedFirstName;
+        LastName = normalizedLastName;
     }
 
     public void ChangeEmail(EmailAddress? email)

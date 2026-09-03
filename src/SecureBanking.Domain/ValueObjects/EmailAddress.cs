@@ -21,12 +21,18 @@ public sealed record EmailAddress
         string normalized = value.Trim().ToLowerInvariant();
         int separatorIndex = normalized.IndexOf('@');
 
-        if (normalized.Length > 254 ||
-            separatorIndex <= 0 ||
-            separatorIndex != normalized.LastIndexOf('@') ||
-            separatorIndex == normalized.Length - 1 ||
-            normalized.Any(char.IsWhiteSpace) ||
-            !normalized[(separatorIndex + 1)..].Contains('.'))
+        if (normalized.Length > 254 || normalized.Any(char.IsWhiteSpace) ||
+            separatorIndex <= 0 || separatorIndex != normalized.LastIndexOf('@') ||
+            separatorIndex == normalized.Length - 1)
+        {
+            throw new InvalidDomainArgumentException("Email address format is invalid.");
+        }
+
+        string localPart = normalized[..separatorIndex];
+        string domain = normalized[(separatorIndex + 1)..];
+
+        if (localPart.Length > 64 || HasInvalidDots(localPart) ||
+            HasInvalidDots(domain) || !domain.Contains('.') || HasInvalidDomainLabel(domain))
         {
             throw new InvalidDomainArgumentException("Email address format is invalid.");
         }
@@ -35,4 +41,11 @@ public sealed record EmailAddress
     }
 
     public override string ToString() => Value;
+
+    private static bool HasInvalidDots(string value) =>
+        value.StartsWith('.') || value.EndsWith('.') || value.Contains("..", StringComparison.Ordinal);
+
+    private static bool HasInvalidDomainLabel(string domain) =>
+        domain.Split('.').Any(label =>
+            label.Length == 0 || label.StartsWith('-') || label.EndsWith('-'));
 }
