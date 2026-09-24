@@ -18,7 +18,7 @@ El repositorio servirá como referencia práctica para separar responsabilidades
 - SHA3-256 para una auditoría encadenada
 - AES-256-GCM para proteger datos sensibles en reposo
 
-La fase actual incorpora exclusivamente el modelo de dominio. No incluye Entity Framework Core, conexión a SQL Server, autenticación, cifrado, transferencias entre cuentas ni una API bancaria funcional.
+La Fase 3 está en desarrollo: el modelo de persistencia con Entity Framework Core ya está configurado, pero todavía no existe una cadena de conexión operativa, migraciones, una base de datos creada, repositorios ni persistencia funcional. Tampoco se incluyen todavía autenticación, cifrado, transferencias entre cuentas ni una API bancaria funcional.
 
 ## Arquitectura
 
@@ -33,6 +33,7 @@ src/
 tests/
 ├── SecureBanking.Domain.UnitTests
 ├── SecureBanking.Application.UnitTests
+├── SecureBanking.Infrastructure.UnitTests
 └── SecureBanking.IntegrationTests
 ```
 
@@ -66,7 +67,7 @@ La API redirige a HTTPS. Al ejecutarla, consulte `GET /health` en la URL HTTPS i
 
 1. Base arquitectónica, endpoint de salud y pruebas iniciales.
 2. Modelo de dominio para clientes y cuentas. **Completada.**
-3. Persistencia con EF Core 10, SQL Server y migraciones.
+3. Persistencia con EF Core 10 y SQL Server. **En desarrollo: modelo de persistencia configurado, sin migraciones ni conexión real.**
 4. Autenticación, autorización y gestión segura de identidades.
 5. Transferencias ACID, historial y control de concurrencia.
 6. Auditoría encadenada con SHA3-256.
@@ -89,4 +90,8 @@ El dominio incluye las entidades `Customer` y `BankAccount`; los objetos de valo
 - Los importes admiten como máximo cuatro decimales; una precisión mayor se rechaza y el dominio nunca redondea dinero implícitamente.
 - Las cuentas congeladas deben descongelarse antes de poder cerrarse.
 
-Todavía no existe persistencia, integración con SQL Server ni una API bancaria funcional.
+Todavía no existe una base de datos, conexión real con SQL Server ni una API bancaria funcional.
+
+### Persistencia en desarrollo
+
+La infraestructura ya contiene el modelo de EF Core 10 para SQL Server, todavía sin una cadena de conexión de aplicación, migraciones, repositorios ni una base de datos creada. `EmailAddress` y `AccountNumber` utilizan conversiones explícitas; `Money` se divide en columnas consultables con importe `decimal(19,4)` y moneda de tres caracteres. Las tablas preparan concurrencia optimista mediante columnas `rowversion`. No se incluyen secretos ni cadenas de conexión reales.

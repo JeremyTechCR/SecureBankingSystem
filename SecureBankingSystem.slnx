@@ -8,6 +8,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/SecureBanking.Application.UnitTests/SecureBanking.Application.UnitTests.csproj" />
     <Project Path="tests/SecureBanking.Domain.UnitTests/SecureBanking.Domain.UnitTests.csproj" />
+    <Project Path="tests/SecureBanking.Infrastructure.UnitTests/SecureBanking.Infrastructure.UnitTests.csproj" />
     <Project Path="tests/SecureBanking.IntegrationTests/SecureBanking.IntegrationTests.csproj" />
   </Folder>
 </Solution>
