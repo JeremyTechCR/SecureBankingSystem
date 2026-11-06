@@ -18,7 +18,7 @@ El repositorio servirá como referencia práctica para separar responsabilidades
 - SHA3-256 para una auditoría encadenada
 - AES-256-GCM para proteger datos sensibles en reposo
 
-La fase actual incorpora exclusivamente el modelo de dominio. No incluye Entity Framework Core, conexión a SQL Server, autenticación, cifrado, transferencias entre cuentas ni una API bancaria funcional.
+La Fase 3 está en desarrollo: el modelo de persistencia con Entity Framework Core, su registro por inyección de dependencias y la migración inicial para SQL Server ya están configurados. En desarrollo local se utiliza SQL Server LocalDB, mientras que los demás entornos deben suministrar su configuración de conexión de forma segura. Todavía no existen repositorios ni una API bancaria funcional; tampoco se incluyen autenticación, cifrado o transferencias entre cuentas.
 
 ## Arquitectura
 
@@ -33,6 +33,7 @@ src/
 tests/
 ├── SecureBanking.Domain.UnitTests
 ├── SecureBanking.Application.UnitTests
+├── SecureBanking.Infrastructure.UnitTests
 └── SecureBanking.IntegrationTests
 ```
 
@@ -51,9 +52,15 @@ tests/
 
 ## Uso local
 
-Requisitos: SDK de .NET 10.
+Requisitos para ejecutar la solución y todas las pruebas:
+
+- Windows.
+- SDK de .NET 10.
+- SQL Server Express LocalDB con la instancia `MSSQLLocalDB`.
+- La herramienta local `dotnet-ef`, que se restaura desde el manifiesto del repositorio.
 
 ```powershell
+dotnet tool restore
 dotnet restore
 dotnet build
 dotnet test
@@ -66,7 +73,7 @@ La API redirige a HTTPS. Al ejecutarla, consulte `GET /health` en la URL HTTPS i
 
 1. Base arquitectónica, endpoint de salud y pruebas iniciales.
 2. Modelo de dominio para clientes y cuentas. **Completada.**
-3. Persistencia con EF Core 10, SQL Server y migraciones.
+3. Persistencia con EF Core 10 y SQL Server. **En desarrollo: migración inicial y pruebas relacionales con LocalDB completadas; repositorios pendientes.**
 4. Autenticación, autorización y gestión segura de identidades.
 5. Transferencias ACID, historial y control de concurrencia.
 6. Auditoría encadenada con SHA3-256.
@@ -89,4 +96,14 @@ El dominio incluye las entidades `Customer` y `BankAccount`; los objetos de valo
 - Los importes admiten como máximo cuatro decimales; una precisión mayor se rechaza y el dominio nunca redondea dinero implícitamente.
 - Las cuentas congeladas deben descongelarse antes de poder cerrarse.
 
-Todavía no existe persistencia, integración con SQL Server ni una API bancaria funcional.
+Todavía no existe una base de datos permanente ni una API bancaria funcional.
+
+### Persistencia en desarrollo
+
+La infraestructura contiene el modelo de EF Core 10 para SQL Server, su registro mediante inyección de dependencias y la migración inicial. `EmailAddress` y `AccountNumber` utilizan conversiones explícitas; `Money` se divide en columnas consultables con importe `decimal(19,4)` y moneda de tres caracteres. Las tablas aplican restricciones físicas y concurrencia optimista mediante columnas `rowversion`.
+
+Las pruebas relacionales crean bases temporales denominadas `SecureBankingTests_{Guid}` en SQL Server LocalDB, aplican la migración y verifican la materialización completa del dominio, las restricciones de la base y conflictos reales de concurrencia; cada base se elimina al finalizar. La migración `InitialPersistence` permanece pendiente para `SecureBankingSystem_Development`: esa base de desarrollo no se ha creado ni migrado.
+
+La conexión incluida es exclusivamente para desarrollo local. Producción debe proporcionar `ConnectionStrings:SecureBanking` mediante configuración externa segura. Para ejecutar estas pruebas en CI se necesitará un runner Windows con LocalDB o una adaptación futura a una instancia real de SQL Server, incluida una ejecutada en contenedor. EF InMemory y SQLite no sustituyen estas validaciones relacionales específicas de SQL Server.
+
+`System.Security.Cryptography.Pkcs` 9.0.22 se fija directamente en Infrastructure como override de seguridad de la dependencia transitiva incorporada por Microsoft.Data.SqlClient. No se incluyen secretos, repositorios ni creación automática de bases al iniciar la API.

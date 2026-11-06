@@ -1,7 +1,10 @@
+using SecureBanking.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
